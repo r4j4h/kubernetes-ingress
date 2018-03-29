@@ -1,0 +1,57 @@
+image: golang:1.9
+
+variables:
+  REPO_NAME: github.com/nginxinc/kubernetes-ingress
+  IMAGE_TAG_BRANCH: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  IMAGE_TAG_MASTER: $CI_REGISTRY_IMAGE:latest
+
+# The problem is that to be able to use go get, one needs to put
+# the repository in the $GOPATH. So for example if your gitlab domain
+# is gitlab.com, and that your repository is namespace/project, and
+# the default GOPATH being /go, then you'd need to have your
+# repository in /go/src/gitlab.com/namespace/project
+# Thus, making a symbolic link corrects this.
+before_script:
+  - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
+  - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
+  - cd $GOPATH/src/$REPO_NAME
+
+stages:
+  - build
+  - docker
+
+### BUILD ###
+
+compile:
+  stage: build
+  script:
+    - OPTS="PREFIX=$CI_REGISTRY_IMAGE BUILD_IN_CONTAINER=0"
+    - cd nginx-controller && make clean $OPTS && make nginx-ingress $OPTS && make test $OPTS
+  artifacts:
+    paths:
+      - nginx-controller
+    expire_in: 1 day
+
+### DOCKER ###
+
+build-docker-branch:
+  stage: docker
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - cd nginx-controller
+    - docker build -t $IMAGE_TAG_BRANCH .
+    - docker push $IMAGE_TAG_BRANCH
+
+build-docker-tags:
+  stage: docker
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - cd nginx-controller
+    - docker build -t $IMAGE_TAG_MASTER .
+    - docker push $IMAGE_TAG_MASTER
+  only:
+    - tags
