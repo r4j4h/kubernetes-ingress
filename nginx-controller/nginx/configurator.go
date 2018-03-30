@@ -109,10 +109,10 @@ func (cnf *Configurator) addOrUpdateMergableIngress(mergeableIngs *MergeableIngr
 
 		for _, server := range nginxCfg.Servers {
 			for _, loc := range server.Locations {
-				if loc.Path != "/" {
-					loc.IngressResource = objectMetaToFileName(&minion.Ingress.ObjectMeta)
-					locations = append(locations, loc)
-				}
+				// if loc.Path != "/" {
+				loc.IngressResource = objectMetaToFileName(&minion.Ingress.ObjectMeta)
+				locations = append(locations, loc)
+				// }
 			}
 		}
 		for _, val := range nginxCfg.Upstreams {
