@@ -17,6 +17,10 @@ Usage of ./nginx-ingress:
   -health-status
     	Add a location "/nginx-health" to the default server. The location responds with the 200 status code for any request.
 	Useful for external health-checking of the Ingress controller
+  -stub-status
+        Add a location "/stub_status" to the default server. The location responds with the stats from stub status
+    module for any request.
+    Useful in tandem with nginx-prometheus-exporter for monitoring of the Ingress controller
   -ingress-class string
     	A class of the Ingress controller. The Ingress controller only processes Ingress resources that belong to its class
 	- i.e. have the annotation "kubernetes.io/ingress.class" equal to the class. Additionally,
