@@ -23,6 +23,7 @@ controller:
   watchNamespace: ""
   healthStatus: false
   stubStatus: false
+  statusAllowIp: ""
   service:
     create: true
     type: LoadBalancer
